@@ -1,3 +1,8 @@
-.topic-content-preview-img {
-	float: right;
+.text img.topic-content-preview-img {
+    float: right;
+    max-width: 300px;
+}
+
+.topic-content-introtext {
+    font-style: italic;
 }

@@ -18,14 +18,12 @@ class PluginTopicintro extends Plugin {
             'ModuleTopic_EntityTopic',
         ),
         'module' => array(
+            'ModuleTopic',
         ),
         'action' => array(
+            'ActionContent',
         ),
     );
-
-    public function __construct() {
-
-    }
 
     /**
      * Активация плагина
