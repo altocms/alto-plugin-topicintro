@@ -48,7 +48,7 @@ $config['single_width'] = true;
 /*
  * Разрешить анонсы топиков (интротекст)
  */
-$config['introtext']['enable'] = true;
+$config['introtext']['enable'] = false;
 
 /*
  * Максимальный размер текста анонса
