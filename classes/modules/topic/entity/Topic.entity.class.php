@@ -160,9 +160,11 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     /**
      * Returns intro text (announce)
      *
+     * @param $sPostfix
+     *
      * @return mixed
      */
-    public function getIntroText() {
+    public function getIntroText($sPostfix = '...') {
 
         $sIntroText = $this->getExtraValue('text_intro');
         if (!$sIntroText && Config::Get('plugin.topicintro.introtext.autocreate')) {
@@ -170,7 +172,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
             $nLen = mb_strlen($sIntroText, 'UTF-8');
             if ($nMax && $nLen > $nMax) {
-                $sIntroText = F::TruncateText($sIntroText, $nMax, '...', true);
+                $sIntroText = F::TruncateText($sIntroText, $nMax, $sPostfix, true);
             }
         }
         return $sIntroText;
@@ -185,7 +187,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         $sText = parent::getTextShort();
         if (Config::Get('plugin.topicintro.introtext.enable') && (!$sText || $sText == $this->getText()) && Config::Get('plugin.topicintro.introtext.text_short')) {
-            $sIntroText = $this->getIntroText();
+            $sIntroText = $this->getIntroText('');
             if ($sIntroText) {
                 $sText = $sIntroText;
             }

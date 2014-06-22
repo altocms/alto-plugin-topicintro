@@ -43,7 +43,7 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
     public function _topicEditShow($aParams) {
 
         if (!isset($_REQUEST['topic_intro_text']) && isset($aParams['oTopic']) && ($oTopic = $aParams['oTopic'])) {
-            $_REQUEST['topic_intro_text'] = $oTopic->getIntroText();
+            $_REQUEST['topic_intro_text'] = $oTopic->getIntroText('');
         }
     }
 }
