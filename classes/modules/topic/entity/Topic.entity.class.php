@@ -66,6 +66,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         return $aResult;
     }
+
     /**
      * @return string
      */
@@ -110,7 +111,11 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         return $sPreviewImage;
     }
 
-
+    /**
+     * @param string|int $xSize
+     *
+     * @return string|null
+     */
     public function getPreviewImageUrl($xSize = null) {
 
         if ($sUrl = $this->getPreviewImage()) {
@@ -150,23 +155,27 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     /**
      * Set intro text for this topic
      *
-     * @param $data
+     * @param string $sData
      */
-    public function setIntroText($data) {
+    public function setIntroText($sData) {
 
-        $this->setExtraValue('text_intro', $data);
+        $this->setExtraValue('text_intro', $sData);
     }
 
     /**
      * Returns intro text (announce)
      *
-     * @param $sPostfix
+     * @param string $sPostfix
+     * @param bool   $bIgnoreShortText
      *
      * @return mixed
      */
-    public function getIntroText($sPostfix = '...') {
+    public function getIntroText($sPostfix = '...', $bIgnoreShortText = false) {
 
         $sIntroText = $this->getExtraValue('text_intro');
+        if (!$sIntroText && !$bIgnoreShortText && Config::Get('plugin.topicintro.introtext.text_short')) {
+            $sIntroText = strip_tags(parent::getTextShort());
+        }
         if (!$sIntroText && Config::Get('plugin.topicintro.introtext.autocreate')) {
             $sIntroText = $this->Topic_ParseIntroText($this->getText());
             $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
@@ -187,7 +196,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         $sText = parent::getTextShort();
         if (Config::Get('plugin.topicintro.introtext.enable') && (!$sText || $sText == $this->getText()) && Config::Get('plugin.topicintro.introtext.text_short')) {
-            $sIntroText = $this->getIntroText('');
+            $sIntroText = $this->getIntroText('', true);
             if ($sIntroText) {
                 $sText = $sIntroText;
             }

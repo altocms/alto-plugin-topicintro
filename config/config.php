@@ -61,12 +61,18 @@ $config['introtext']['max_size'] = 200;
 $config['introtext']['autocreate'] = true;
 
 /*
- * Использовать интротекст, если краткий текст топика не задан
+ * Использовать интротекст, как краткий текст топика
  */
 $config['introtext']['text_short'] = true;
 
-$config['introtext']['hook_list'] = 'template_topic_content_begin';
+/*
+ * Шаблонный хук, по которому интротекст выводится в ленте топиков
+ */
+//$config['introtext']['hook_list'] = 'template_topic_content_begin';
 
+/*
+ * Шаблонный хук, по которому интротекст выводится при просмотре топика
+ */
 //$config['introtext']['hook_show'] = 'template_topic_content_begin';
 
 // EOF
