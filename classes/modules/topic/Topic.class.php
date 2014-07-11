@@ -13,7 +13,10 @@ class PluginTopicintro_ModuleTopic extends PluginTopicintro_Inherits_ModuleTopic
     public function ParseIntroText($sText) {
 
         if ($sText && is_scalar($sText)) {
-            $sText = trim(strip_tags($sText));
+            if (!Config::Get('plugin.topicintro.introtext.html_tags')) {
+                $sText = strip_tags($sText);
+            }
+            $sText = trim($sText);
         } else {
             $sText = '';
         }

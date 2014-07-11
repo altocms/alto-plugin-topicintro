@@ -75,4 +75,9 @@ $config['introtext']['text_short'] = true;
  */
 //$config['introtext']['hook_show'] = 'template_topic_content_begin';
 
+/*
+ * Разрешеныли теги в интротексте
+ */
+$config['introtext']['html_tags'] = true;
+
 // EOF

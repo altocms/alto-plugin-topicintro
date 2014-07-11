@@ -168,13 +168,17 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
      * @param string $sPostfix
      * @param bool   $bIgnoreShortText
      *
-     * @return mixed
+     * @return string
      */
     public function getIntroText($sPostfix = '...', $bIgnoreShortText = false) {
 
         $sIntroText = $this->getExtraValue('text_intro');
         if (!$sIntroText && !$bIgnoreShortText && Config::Get('plugin.topicintro.introtext.text_short')) {
-            $sIntroText = strip_tags(parent::getTextShort());
+            $sIntroText = parent::getTextShort();
+            if (!Config::Get('plugin.topicintro.introtext.html_tags')) {
+                $sIntroText = strip_tags($sIntroText);
+            }
+            $sIntroText = trim($sIntroText);
         }
         if (!$sIntroText && Config::Get('plugin.topicintro.introtext.autocreate')) {
             $sIntroText = $this->Topic_ParseIntroText($this->getText());
@@ -190,7 +194,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     /**
      * Returns short text (part before <cut>)
      *
-     * @return mixed
+     * @return string
      */
     public function getTextShort() {
 

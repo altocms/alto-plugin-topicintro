@@ -16,7 +16,9 @@
 <div class="form-group js-topic_intro_text" style="display: none;">
     <label for="topic_text">{$aLang.plugin.topicintro.topic_create_intro_text}</label>
     <textarea name="topic_intro_text" id="topic_intro_text" rows="4"
-              class="form-control">{$_aRequest.topic_intro_text}</textarea>
+              class="form-control
+              {if Config::Get('plugin.topicintro.introtext.html_tags')}js-editor-wysiwyg js-editor-markitup{/if}"
+            >{$_aRequest.topic_intro_text}</textarea>
 
     <p class="help-block">
         <small>{$aLang.plugin.topicintro.topic_create_intro_text_note}</small>
