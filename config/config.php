@@ -39,7 +39,7 @@ $config['preview']['size'] = array(
     'edit'    => '150x150', // размер при создании/редактировании статьи
 );
 
-$config['preview']['edit'] = true;
+$config['preview']['edit'] = false;
 
 /*
  * Как интерпретировать одиночное значение
