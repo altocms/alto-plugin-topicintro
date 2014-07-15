@@ -12,19 +12,23 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
 
     protected function checkTopicFields($oTopic) {
 
-        $sIntroText = $this->Topic_ParseIntroText(F::GetRequestStr('topic_intro_text'));
-        $oTopic->setIntroText($sIntroText);
-
-        $nLen = mb_strlen($sIntroText, 'UTF-8');
-        $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
         $bResult = true;
+        if (Config::Get('plugin.topicintro.introtext.enable')) {
+            $sIntroText = $this->Topic_ParseIntroText(F::GetRequestStr('topic_intro_text'));
+            // introtext will be saved in topic
+            $oTopic->setIntroText($sIntroText);
 
-        if ($nMax && ($nLen > $nMax)) {
-            $this->Message_AddError(
-                $this->Lang_Get('plugin.topicintro.topic_create_intro_text_error', array('len' => $nLen, 'max'=>$nMax)),
-                $this->Lang_Get('error')
-            );
-            $bResult = false;
+            // defines length of introtext without tags
+            $nLen = mb_strlen(strip_tags($sIntroText), 'UTF-8');
+            $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
+
+            if ($nMax && ($nLen > $nMax)) {
+                $this->Message_AddError(
+                    $this->Lang_Get('plugin.topicintro.topic_create_intro_text_error', array('len' => $nLen, 'max'=>$nMax)),
+                    $this->Lang_Get('error')
+                );
+                $bResult = false;
+            }
         }
 
         if ($oTopic->getAutopreview() && Config::Get('plugin.topicintro.autopreview.enable')) {
@@ -46,6 +50,24 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
             $_REQUEST['topic_intro_text'] = $oTopic->getIntroText('');
         }
     }
+
+    /**
+     * Adds new topic
+     *
+     * @param $oTopic
+     *
+     * @return mixed
+     */
+    protected function _addTopic($oTopic) {
+
+        $sImageUrl = $this->Topic_GetTmpIntroimage();
+        if ($sImageUrl) {
+            $oTopic->setPreviewImage($sImageUrl);
+            $this->Topic_DelTmpIntroimage();
+        }
+        return parent::_addTopic($oTopic);
+    }
+
 }
 
 // EOF

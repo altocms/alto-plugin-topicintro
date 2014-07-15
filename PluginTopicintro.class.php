@@ -11,6 +11,9 @@
 class PluginTopicintro extends Plugin {
 
     protected $aDelegates = array(
+        'template' => array(
+            'modals/modal.upload_preview.tpl',
+        ),
     );
 
     protected $aInherits = array(
@@ -22,6 +25,7 @@ class PluginTopicintro extends Plugin {
         ),
         'action' => array(
             'ActionContent',
+            'ActionAjax',
         ),
     );
 
@@ -38,6 +42,8 @@ class PluginTopicintro extends Plugin {
      */
     public function Init() {
 
+        //$this->Viewer_AppendScript(Plugin::GetTemplateDir(__CLASS__) . 'assets/js/script.js');
+        $this->Viewer_AppendScript(Plugin::GetTemplateUrl(__CLASS__) . 'assets/js/script.js');
         $this->Viewer_AppendStyle(Plugin::GetTemplateDir(__CLASS__) . 'assets/css/style.css');
         return true;
     }

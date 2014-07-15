@@ -18,9 +18,10 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         return $this->getPreviewImageUrl($sSize);
     }
 
-    public function setPreviewImage($data) {
+    public function setPreviewImage($data, $bAutopreview = false) {
 
         $this->setExtraValue('preview_image', $data);
+        $this->setAutopreview($bAutopreview);
     }
 
     public function setAutopreview($data) {
@@ -101,9 +102,10 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             }
             if (!$sPreviewImage && Config::Get('plugin.topicintro.autopreview.enable')) {
                 $sPreviewImage = $this->getFirstImage();
+                $this->setAutoPreviewImage($sPreviewImage ? $sPreviewImage : false);
+            } else {
+                $this->setPreviewImage($sPreviewImage ? $sPreviewImage : false);
             }
-            $this->setPreviewImage($sPreviewImage ? $sPreviewImage : false);
-            $this->setAutopreview(true);
             if (Config::Get('plugin.topicintro.autopreview.autosave')) {
                 $this->Topic_UpdateTopic($this);
             }
@@ -121,11 +123,11 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         if ($sUrl = $this->getPreviewImage()) {
             if (F::File_IsLocalUrl($sUrl)) {
                 if (!$xSize) {
-                    $xSize = Config::Get('plugin.topicintro.preview_size.default');
+                    $xSize = Config::Get('plugin.topicintro.preview.size.default');
                     if (!$xSize) {
                         $xSize = self::DEFAULT_PREVIEW_SIZE;
                     }
-                } elseif ($xPresetSize = Config::Get('plugin.topicintro.preview_size.' . $xSize)){
+                } elseif ($xPresetSize = Config::Get('plugin.topicintro.preview.size.' . $xSize)){
                     $xSize = $xPresetSize;
                 }
                 if (is_numeric($xSize) && intval($xSize) == $xSize) {

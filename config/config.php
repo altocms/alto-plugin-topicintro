@@ -34,9 +34,12 @@ $config['autopreview']['hook_list'] = 'template_topic_content_begin';
 /*
  * Предзаданные размеры автопревью
  */
-$config['preview_size'] = array(
+$config['preview']['size'] = array(
     'default' => 'x300', // размер по умолчанию
+    'edit'    => '150x150', // размер при создании/редактировании статьи
 );
+
+$config['preview']['edit'] = true;
 
 /*
  * Как интерпретировать одиночное значение
@@ -76,7 +79,7 @@ $config['introtext']['text_short'] = true;
 //$config['introtext']['hook_show'] = 'template_topic_content_begin';
 
 /*
- * Разрешеныли теги в интротексте
+ * Разрешены ли теги в интротексте
  */
 $config['introtext']['html_tags'] = true;
 

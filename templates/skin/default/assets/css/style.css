@@ -7,3 +7,20 @@
 .topic-content-introtext {
     font-style: italic;
 }
+
+.topc-edit-preview {
+}
+
+.topc-edit-preview-wrapper {
+    display: block;
+    background-color: #EEEEEE;
+    border: 1px solid #CCCCCC;
+    height: 152px;
+    width: 152px;
+    float: left;
+    margin-right: 8px;
+}
+
+.topc-edit-preview-note {
+    margin-bottom: 10px;
+}
