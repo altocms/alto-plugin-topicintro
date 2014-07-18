@@ -47,7 +47,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         $sText = $this->getText();
         $aResult = array();
-        if (preg_match('~\<img\s.*src\s*=\s*([^\s]+)\s*\/\>~siU', $sText, $aM, PREG_OFFSET_CAPTURE)) {
+        if (preg_match('~src\s*=\s*("[^\s]+")~siU', $sText, $aM, PREG_OFFSET_CAPTURE)) {
             $sImg = trim($aM[1][0]);
             if (substr($sImg, 0, 1) == '"' || substr($sImg, 0, 1) == '\'') {
                 $sImg = substr($sImg, 1, strlen($sImg) - 2);
