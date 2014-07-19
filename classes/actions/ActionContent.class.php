@@ -35,6 +35,10 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
             // set preview image to null because it will be created automatically
             $oTopic->setPreviewImage(null);
         }
+        if (!$oTopic->getAutopreview() && !Config::Get('plugin.topicintro.preview.edit')) {
+            // set preview image to null because it will be created automatically
+            $oTopic->setPreviewImage(null);
+        }
         return $bResult && parent::checkTopicFields($oTopic);
     }
 

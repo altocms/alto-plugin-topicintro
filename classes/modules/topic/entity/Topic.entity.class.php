@@ -20,6 +20,9 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
     public function setPreviewImage($data, $bAutopreview = false) {
 
+        if (is_null($data) && (func_num_args() == 1)) {
+            $bAutopreview = null;
+        }
         $this->setExtraValue('preview_image', $data);
         $this->setAutopreview($bAutopreview);
     }
@@ -47,13 +50,18 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         $sText = $this->getText();
         $aResult = array();
-        if (preg_match('~\<img\s.*src\s*=\s*([^\s]+)\s*\/\>~siU', $sText, $aM, PREG_OFFSET_CAPTURE)) {
-            $sImg = trim($aM[1][0]);
-            if (substr($sImg, 0, 1) == '"' || substr($sImg, 0, 1) == '\'') {
-                $sImg = substr($sImg, 1, strlen($sImg) - 2);
+
+        // Seek all images and select the first with no data:URI
+        if (preg_match_all('~\<img\s[^>]*src\s*=\s*[\'\"]?([^\s]+)[\'\"]?\s*[^>]*\>~si', $sText, $aM, PREG_OFFSET_CAPTURE)) {
+            foreach ($aM[1] as $nIdx => $aData) {
+                // $aM[1][x][0] - link to image or data:URI
+                $sImg = trim($aData[0]);
+                if (strpos($sImg, 'data:') === false) {
+                    // $aM[0][x][1] - found position
+                    $aResult[$aM[0][$nIdx][1]] = $sImg;
+                    break;
+                }
             }
-            // $aM[0][1] - position
-            $aResult[$aM[0][1]] = $sImg;
         }
 
         if (Config::Get('plugin.topicintro.autopreview.video')) {

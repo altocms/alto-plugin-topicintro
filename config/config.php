@@ -32,13 +32,14 @@ $config['autopreview']['hook_list'] = 'template_topic_content_begin';
 //$config['autopreview']['hook_show'] = 'template_topic_content_begin';
 
 /*
- * Предзаданные размеры автопревью
+ * Предзаданные размеры превью-изображений
  */
 $config['preview']['size'] = array(
     'default' => 'x300', // размер по умолчанию
-    'edit'    => '150x150', // размер при создании/редактировании статьи
+    'edit'    => '150x150', // размер при создании/редактировании статьи (если задано $config['preview']['edit'])
 );
 
+// Разрешить задание автопревью вручную при создании/редактировании статьи
 $config['preview']['edit'] = false;
 
 /*
