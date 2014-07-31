@@ -52,7 +52,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         $aResult = array();
 
         // Seek all images and select the first with no data:URI
-        if (preg_match_all('~\<img\s[^>]*src\s*=\s*[\'\"]?([^\s]+)[\'\"]?\s*[^>]*\>~si', $sText, $aM, PREG_OFFSET_CAPTURE)) {
+        if (preg_match_all('~\<img\s[^>]*src\s*=\s*[\'\"]?([^\s\'\"]+)[\'\"]?\s*[^>]*\>~si', $sText, $aM, PREG_OFFSET_CAPTURE)) {
             foreach ($aM[1] as $nIdx => $aData) {
                 // $aM[1][x][0] - link to image or data:URI
                 $sImg = trim($aData[0]);
