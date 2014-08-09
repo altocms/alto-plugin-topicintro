@@ -122,6 +122,33 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     }
 
     /**
+     * Normalize image size format using predefined settings
+     *
+     * @param string|int $xSize
+     *
+     * @return string
+     */
+    protected function _nornalizePreviewSize($xSize = null) {
+
+        if (!$xSize) {
+            $xSize = Config::Get('plugin.topicintro.preview.size.default');
+            if (!$xSize) {
+                $xSize = self::DEFAULT_PREVIEW_SIZE;
+            }
+        } elseif ($xPresetSize = Config::Get('plugin.topicintro.preview.size.' . $xSize)){
+            $xSize = $xPresetSize;
+        }
+        if (is_numeric($xSize) && intval($xSize) == $xSize) {
+            if (Config::Get('plugin.topicintro.single_width')) {
+                $xSize = 'x' . $xSize;
+            } else {
+                $xSize = $xSize . 'x' . $xSize;
+            }
+        }
+        return (string)$xSize;
+    }
+
+    /**
      * @param string|int $xSize
      *
      * @return string|null
@@ -130,34 +157,124 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         if ($sUrl = $this->getPreviewImage()) {
             if (F::File_IsLocalUrl($sUrl)) {
-                if (!$xSize) {
-                    $xSize = Config::Get('plugin.topicintro.preview.size.default');
-                    if (!$xSize) {
-                        $xSize = self::DEFAULT_PREVIEW_SIZE;
-                    }
-                } elseif ($xPresetSize = Config::Get('plugin.topicintro.preview.size.' . $xSize)){
-                    $xSize = $xPresetSize;
-                }
-                if (is_numeric($xSize) && intval($xSize) == $xSize) {
-                    if (Config::Get('plugin.topicintro.single_width')) {
-                        $xSize = 'x' . $xSize;
-                    } else {
-                        $xSize = $xSize . 'x' . $xSize;
-                    }
-                }
-                $sModSuffix = F::File_ImgModSuffix($xSize, strtolower(pathinfo($sUrl, PATHINFO_EXTENSION)));
+                $sSize = $this->_nornalizePreviewSize($xSize);
+                $sModSuffix = F::File_ImgModSuffix($sSize, strtolower(pathinfo($sUrl, PATHINFO_EXTENSION)));
                 $sUrl = $sUrl . $sModSuffix;
                 if (Config::Get('module.image.autoresize')) {
                     $sFile = $this->Uploader_Url2Dir($sUrl);
                     if (!F::File_Exists($sFile)) {
                         $this->Img_Duplicate($sFile);
                     }
+                    $this->_setPreviewImageSize($sSize, $sFile);
                 }
             }
             return $sUrl;
         } else {
             return null;
         }
+    }
+
+    /**
+     * Sets preview image sizes and attributes and returns its
+     *
+     * @param string      $sSize
+     * @param string|null $sFile
+     * @param bool        $bReset
+     *
+     * @return array
+     */
+    protected function _setPreviewImageSize($sSize, $sFile = null, $bReset = false) {
+
+        $sPropKey = '_size-' . $sSize . '-imgsize';
+        $aSize = $this->getProp($sPropKey);
+        if (!$aSize || $bReset) {
+            if ($sFile && F::File_Exists($sFile)) {
+                $aSize = getimagesize($sFile);
+                $aSize['width'] = $aSize[0];
+                $aSize['height'] = $aSize[1];
+                $aSize['attr'] = $aSize[3];
+                $aSize['style'] = ''
+                    . ($aSize[0] ? 'width:' . $aSize[0] . 'px;' : '')
+                    . ($aSize[1] ? 'height:' . $aSize[1] . 'px;' : '');
+            } else {
+                $aModAttr = F::File_ImgModAttr($sSize);
+                $aSize = array(
+                    'width'  => $aModAttr['width'],
+                    'height' => $aModAttr['height'],
+                    'attr'   => ' '
+                        . ($aModAttr['width'] ? 'width="' . $aModAttr['width'] . '"' : '') . ' '
+                        . ($aModAttr['height'] ? 'height="' . $aModAttr['height'] . '"' : '') . ' ',
+                    'style' => null,
+                );
+                if (!empty($aModAttr['mod'])) {
+                    if ($aModAttr['mod'] == 'fit') {
+                        $aSize['max-width'] = $aModAttr['width'];
+                        $aSize['max-height'] = $aModAttr['height'];
+                        $aSize['style'] = ''
+                            . ($aSize['width'] ? 'max-width:' . $aSize['width'] . 'px;' : '')
+                            . ($aSize['height'] ? 'max-height:' . $aSize['height'] . 'px;' : '');
+                    }
+                    if ($aModAttr['mod'] == 'pad') {
+                        $aSize['min-width'] = $aModAttr['width'];
+                        $aSize['min-height'] = $aModAttr['height'];
+                        $aSize['style'] = ''
+                            . ($aSize['width'] ? 'min-width:' . $aSize['width'] . 'px;' : '')
+                            . ($aSize['height'] ? 'min-height:' . $aSize['height'] . 'px;' : '');
+                    }
+                }
+                if (!$aSize['style']) {
+                    $aSize['style'] = ''
+                        . ($aSize['width'] ? 'width:' . $aSize['width'] . 'px;' : '')
+                        . ($aSize['height'] ? 'height:' . $aSize['height'] . 'px;' : '');
+                }
+            }
+            $this->setProp($sPropKey, $aSize);
+        }
+        return $aSize;
+    }
+
+    /**
+     * Returns preview image's sizes and attributes
+     *
+     * @param string|int $xSize
+     *
+     * @return array
+     */
+    public function getPreviewImageSize($xSize = null) {
+
+        $sSize = $this->_nornalizePreviewSize($xSize);
+        $sPropKey = '_size-' . $sSize . '-imgsize';
+        $aSize = $this->getProp($sPropKey);
+        if (!$aSize) {
+            $aSize = $this->_setPreviewImageSize($sSize);
+        }
+        return $aSize;
+    }
+
+    /**
+     * Returns preview image's sizes as CSS style values
+     *
+     * @param string|int $xSize
+     *
+     * @return string
+     */
+    public function getPreviewImageSizeStyle($xSize = null) {
+
+        $aSize = $this->getPreviewImageSize($xSize);
+        return !empty($aSize['style']) ? $aSize['style'] : '';
+    }
+
+    /**
+     * Returns preview image's sizes as HTML tag attributes
+     *
+     * @param string|int $xSize
+     *
+     * @return string
+     */
+    public function getPreviewImageSizeAttr($xSize = null) {
+
+        $aSize = $this->getPreviewImageSize($xSize);
+        return !empty($aSize['attr']) ? $aSize['attr'] : '';
     }
 
     /* Intro text */
