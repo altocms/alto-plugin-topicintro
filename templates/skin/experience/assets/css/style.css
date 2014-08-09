@@ -2,6 +2,7 @@
 .topic-text img.topic-content-preview-img {
     float: right;
     max-width: 300px;
+    margin-left: 10px;
 }
 
 .topic-content-introtext {

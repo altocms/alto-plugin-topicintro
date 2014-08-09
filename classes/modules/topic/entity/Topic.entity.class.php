@@ -44,12 +44,16 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     }
 
     /**
+     * @param string $sText
+     *
      * @return mixed
      */
-    protected function _seekProtoImages() {
+    protected function _seekProtoImages($sText = null) {
 
-        $sText = $this->getText();
         $aResult = array();
+        if (is_null($sText)) {
+            $sText = $this->getText();
+        }
 
         // Seek all images and select the first with no data:URI
         if (preg_match_all('~\<img\s[^>]*src\s*=\s*[\'\"]?([^\s\'\"]+)[\'\"]?\s*[^>]*\>~si', $sText, $aM, PREG_OFFSET_CAPTURE)) {
@@ -77,20 +81,28 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     }
 
     /**
-     * @return string
+     * @param bool $bInIntroText
+     *
+     * @return string|null
      */
-    public function getFirstImage() {
+    public function getFirstImage($bInIntroText = false) {
 
-        $sImg = $this->getProp('_first_image_url');
+        $sPropKey = '_first_image_url_' . ($bInIntroText ? 'i' : 't');
+        $sImg = $this->getProp($sPropKey);
         if (is_null($sImg)) {
             $sImg = '';
-            if ($aImg = $this->_seekProtoImages()) {
+            if ($bInIntroText) {
+                $sText = $this->getIntroText('');
+            } else {
+                $sText = $this->getText();
+            }
+            if ($aImg = $this->_seekProtoImages($sText)) {
                 if (sizeof($aImg) > 1) {
                     ksort($aImg);
                 }
                 $sImg = reset($aImg);
             }
-            $this->setProp('_first_image_url', $sImg);
+            $this->setProp($sPropKey, $sImg);
         }
         return $sImg;
     }
@@ -189,6 +201,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         $aSize = $this->getProp($sPropKey);
         if (!$aSize || $bReset) {
             if ($sFile && F::File_Exists($sFile)) {
+                // real sizes
                 $aSize = getimagesize($sFile);
                 $aSize['width'] = $aSize[0];
                 $aSize['height'] = $aSize[1];
@@ -197,6 +210,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
                     . ($aSize[0] ? 'width:' . $aSize[0] . 'px;' : '')
                     . ($aSize[1] ? 'height:' . $aSize[1] . 'px;' : '');
             } else {
+                // computed sizes
                 $aModAttr = F::File_ImgModAttr($sSize);
                 $aSize = array(
                     'width'  => $aModAttr['width'],
@@ -312,7 +326,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
             $nLen = mb_strlen($sIntroText, 'UTF-8');
             if ($nMax && $nLen > $nMax) {
-                $sIntroText = F::TruncateText($sIntroText, $nMax, $sPostfix, true);
+                $sIntroText = $this->Text_TruncateText($sIntroText, $nMax - mb_strlen($sPostfix, 'UTF-8'));
             }
         }
         return $sIntroText;
