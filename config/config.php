@@ -13,6 +13,10 @@
  */
 $config['autopreview']['enable'] = true;
 
+$config['autopreview']['ignore'] = array(
+    //'css_class' => 'some_css_class', // ignored classes
+);
+
 /*
  * Создавать автопревью из видео
  */
@@ -72,7 +76,7 @@ $config['introtext']['text_short'] = true;
 /*
  * Шаблонный хук, по которому интротекст выводится в ленте топиков
  */
-//$config['introtext']['hook_list'] = 'template_topic_content_begin';
+//$config['introtext']['hook_list'] = 'template_topic_content _begin';
 
 /*
  * Шаблонный хук, по которому интротекст выводится при просмотре топика

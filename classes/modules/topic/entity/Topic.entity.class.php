@@ -43,12 +43,38 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         $this->setAutopreview(true);
     }
 
+    protected function _checkCssClasses($aClasses, $aSrcClasses) {
+
+        if (!is_array($aClasses)) {
+            $aClasses = explode(' ', $aClasses);
+        }
+        if (!is_array($aSrcClasses)) {
+            $aSrcClasses = explode(' ', $aSrcClasses);
+        }
+
+        if (sizeof($aClasses) == sizeof($aSrcClasses)) {
+            if (sizeof($aClasses) == 1) {
+                return reset($aClasses) == reset($aSrcClasses);
+            }
+            sort($aClasses);
+            sort($aSrcClasses);
+            foreach ($aClasses as $iKey => $sCssClass) {
+                if ($aSrcClasses[$iKey] != $sCssClass) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @param string $sText
+     * @param array  $aParams
      *
      * @return mixed
      */
-    protected function _seekProtoImages($sText = null) {
+    protected function _seekProtoImages($sText = null, $aParams = array()) {
 
         $aResult = array();
         if (is_null($sText)) {
@@ -57,13 +83,30 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         // Seek all images and select the first with no data:URI
         if (preg_match_all('~\<img\s[^>]*src\s*=\s*[\'\"]?([^\s\'\"]+)[\'\"]?\s*[^>]*\>~si', $sText, $aM, PREG_OFFSET_CAPTURE)) {
+            if (isset($aParams['ignore']['css_class'])) {
+                $aIgnoreCssClasses = $aParams['ignore']['css_class'];
+                if (!is_array($aIgnoreCssClasses)) {
+                    $aIgnoreCssClasses = array((string)$aIgnoreCssClasses);
+                }
+            } else {
+                $aIgnoreCssClasses = array();
+            }
             foreach ($aM[1] as $nIdx => $aData) {
                 // $aM[1][x][0] - link to image or data:URI
                 $sImg = trim($aData[0]);
                 if (strpos($sImg, 'data:') === false) {
-                    // $aM[0][x][1] - found position
-                    $aResult[$aM[0][$nIdx][1]] = $sImg;
-                    break;
+                    // $aM[0][x][0] - tag <img ...>
+                    if ($aIgnoreCssClasses && preg_match('/\sclass\s*=\s*[\'\"](.+)[\'\"]/si', $aM[0][$nIdx][0], $aMtch)) {
+                        $bIgnore = $this->_checkCssClasses($aIgnoreCssClasses, $aMtch[1]);
+                    } else {
+                        $bIgnore = false;
+                    }
+
+                    if (!$bIgnore) {
+                        // $aM[0][x][1] - found position
+                        $aResult[$aM[0][$nIdx][1]] = $sImg;
+                        break;
+                    }
                 }
             }
         }
@@ -72,7 +115,9 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             $aData = $this->PluginTopicintro_ModuleVideoinfo_ParseText($sText);
             if ($aData) {
                 foreach($aData as $aVideoInfo) {
-                    $aResult[$aVideoInfo['pos']] = $aVideoInfo['info']['thumbnail'];
+                    if (isset($aVideoInfo['info']['thumbnail'])) {
+                        $aResult[$aVideoInfo['pos']] = $aVideoInfo['info']['thumbnail'];
+                    }
                 }
             }
         }
@@ -96,7 +141,8 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             } else {
                 $sText = $this->getText();
             }
-            if ($aImg = $this->_seekProtoImages($sText)) {
+            $aParams = Config::Get('plugin.topicintro.autopreview');
+            if ($aImg = $this->_seekProtoImages($sText, $aParams)) {
                 if (sizeof($aImg) > 1) {
                     ksort($aImg);
                 }
@@ -126,7 +172,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             } else {
                 $this->setPreviewImage($sPreviewImage ? $sPreviewImage : false);
             }
-            if (Config::Get('plugin.topicintro.autopreview.autosave')) {
+            if (Config::Get('plugin.topicintro.autopreview.autosave') && $this->getId()) {
                 $this->Topic_UpdateTopic($this);
             }
         }
@@ -140,7 +186,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
      *
      * @return string
      */
-    protected function _nornalizePreviewSize($xSize = null) {
+    protected function _normalizePreviewSize($xSize = null) {
 
         if (!$xSize) {
             $xSize = Config::Get('plugin.topicintro.preview.size.default');
@@ -169,7 +215,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         if ($sUrl = $this->getPreviewImage()) {
             if (F::File_IsLocalUrl($sUrl)) {
-                $sSize = $this->_nornalizePreviewSize($xSize);
+                $sSize = $this->_normalizePreviewSize($xSize);
                 $sModSuffix = F::File_ImgModSuffix($sSize, strtolower(pathinfo($sUrl, PATHINFO_EXTENSION)));
                 $sUrl = $sUrl . $sModSuffix;
                 if (Config::Get('module.image.autoresize')) {
@@ -256,7 +302,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
      */
     public function getPreviewImageSize($xSize = null) {
 
-        $sSize = $this->_nornalizePreviewSize($xSize);
+        $sSize = $this->_normalizePreviewSize($xSize);
         $sPropKey = '_size-' . $sSize . '-imgsize';
         $aSize = $this->getProp($sPropKey);
         if (!$aSize) {

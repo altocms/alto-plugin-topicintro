@@ -48,7 +48,7 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         );
 
         $this->aRules[] = array(
-            'pattern' => '~<video>.+/rutube\.ru\/video/(?<id>[\w\-]+).*</video>~siU',
+            'pattern' => '~<video>.+/rutube\.ru\/video/(?<id>[\w\-]+).*</video>~si',
             'service' => 'rutube',
             'callback' => 'GetInfoRutube',
         );
@@ -69,6 +69,8 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 $sData = $oXml->xpath($sPath);
                 $aResult[$sKey] = trim((string)array_shift($sData));
             }
+        } else {
+            $aResult = array();
         }
         return $aResult;
     }
@@ -93,13 +95,15 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 'duration' => 'video/duration',
                 'link' => 'video/url',
             ));
-        if ($aResult['width'] && $aResult['height']) {
-            $nW = self::DEFAULT_WIDTH;
-            $nK = $aResult['width'] / $nW;
-            $nH = round($aResult['height'] / $nK);
+        if ($aResult) {
+            if ($aResult['width'] && $aResult['height']) {
+                $nW = self::DEFAULT_WIDTH;
+                $nK = $aResult['width'] / $nW;
+                $nH = round($aResult['height'] / $nK);
+            }
+            $sHtml = '<iframe src="//player.vimeo.com/video/' . $sVideoId . '?title=0&amp;byline=0&amp;portrait=0" width="' . $nW . '" height="' . $nH . '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+            $aResult['html'] = $sHtml;
         }
-        $sHtml = '<iframe src="//player.vimeo.com/video/' . $sVideoId . '?title=0&amp;byline=0&amp;portrait=0" width="' . $nW . '" height="' . $nH . '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
-        $aResult['html'] = $sHtml;
         return $aResult;
     }
 
@@ -113,21 +117,23 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 'html' => 'html',
                 'track_id' => 'track_id'
             ));
-        if ($aResult['html'] && preg_match('~\s+width\s*=\s*["\']?(\d+)["\']?\s+height\s*=\s*["\']?(\d+)["\']?', $aResult['html'], $aM)) {
-            $aResult['width'] = $aM[1];
-            $aResult['height'] = $aM[2];
+        if ($aResult) {
+            if ($aResult['html'] && preg_match('~\s+width\s*=\s*["\']?(\d+)["\']?\s+height\s*=\s*["\']?(\d+)["\']?', $aResult['html'], $aM)) {
+                $aResult['width'] = $aM[1];
+                $aResult['height'] = $aM[2];
+            }
+            if ($aResult['width'] && $aResult['height']) {
+                $nW = self::DEFAULT_WIDTH;
+                $nK = $aResult['width'] / $nW;
+                $nH = round($aResult['height'] / $nK);
+            }
+            $sData = @file_get_contents($sUrl);
+            if ($sData && preg_match('~<thumbnail_large>(.+)</thumbnail_large>~', $sData, $aM)) {
+                $sThumbnail = trim($aM[1]);
+            }
+            $sHtml = '<iframe width="' . $nW . '" height="' . $nH . '" src="//rutube.ru/play/embed/' . $aResult['track_id'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
+            $aResult['html'] = $sHtml;
         }
-        if ($aResult['width'] && $aResult['height']) {
-            $nW = self::DEFAULT_WIDTH;
-            $nK = $aResult['width'] / $nW;
-            $nH = round($aResult['height'] / $nK);
-        }
-        $sData = @file_get_contents($sUrl);
-        if ($sData && preg_match('~<thumbnail_large>(.+)</thumbnail_large>~', $sData, $aM)) {
-            $sThumbnail = trim($aM[1]);
-        }
-        $sHtml = '<iframe width="' . $nW . '" height="' . $nH . '" src="//rutube.ru/play/embed/' . $aResult['track_id'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
-        $aResult['html'] = $sHtml;
         return $aResult;
     }
 
@@ -142,13 +148,15 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 'height' => 'height',
                 'html' => 'html',
             ));
-        if ($aResult['width'] && $aResult['height']) {
-            $nW = self::DEFAULT_WIDTH;
-            $nK = $aResult['width'] / $nW;
-            $nH = round($aResult['height'] / $nK);
+        if ($aResult) {
+            if ($aResult['width'] && $aResult['height']) {
+                $nW = self::DEFAULT_WIDTH;
+                $nK = $aResult['width'] / $nW;
+                $nH = round($aResult['height'] / $nK);
+            }
+            $sHtml = '<iframe width="' . $nW . '" height="' . $nH . '" src="//rutube.ru/play/embed/' . $sVideoId . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
+            $aResult['html'] = $sHtml;
         }
-        $sHtml = '<iframe width="' . $nW . '" height="' . $nH . '" src="//rutube.ru/play/embed/' . $sVideoId . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
-        $aResult['html'] = $sHtml;
         return $aResult;
     }
 
