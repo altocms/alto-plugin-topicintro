@@ -96,7 +96,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
                 $sImg = trim($aData[0]);
                 if (strpos($sImg, 'data:') === false) {
                     // $aM[0][x][0] - tag <img ...>
-                    if ($aIgnoreCssClasses && preg_match('/\sclass\s*=\s*[\'\"](.+)[\'\"]/si', $aM[0][$nIdx][0], $aMtch)) {
+                    if ($aIgnoreCssClasses && preg_match('/\sclass\s*=\s*[\'\"]([^\'\"]+)[\'\"]/si', $aM[0][$nIdx][0], $aMtch)) {
                         $bIgnore = $this->_checkCssClasses($aIgnoreCssClasses, $aMtch[1]);
                     } else {
                         $bIgnore = false;
