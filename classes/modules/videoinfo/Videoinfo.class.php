@@ -54,11 +54,22 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         );
 
         $this->aRules[] = array(
-            'pattern' => '~<iframe[^>]+src\s*=\s*["\'](https?:)?//(?:www\.|)rutube\.ru\/play\/embed\/(?<id>\d+).*</iframe>~si',
-            'service' => 'vimeo',
+            'pattern' => '~<iframe[^>]+src\s*=\s*["\'](https?:)?//(?:www\.|)rutube\.ru\/play\/embed\/(?<id>\d+)["\'\s\<].*/iframe>~si',
+            'service' => 'rutube',
             'callback' => 'GetInfoRutubeTrack',
         );
 
+        $this->aRules[] = array(
+            'pattern' => '~<iframe[^>]+src\s*=\s*["\'](https?:)?//(?:www\.|)rutube\.ru\/play\/embed\/(?<id>\w{32}).*</iframe>~si',
+            'service' => 'rutube',
+            'callback' => 'GetInfoRutube',
+        );
+
+        $this->aRules[] = array(
+            'pattern' => '~<video>(https?:)?//(?:www\.|)rutube\.ru\/play\/embed\/(?<id>\w+).*</video>~si',
+            'service' => 'rutube',
+            'callback' => 'GetInfoRutube',
+        );
     }
 
     public function ReadInfoFromXml($sUrl, $aPaths) {
@@ -109,7 +120,7 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
 
     public function GetInfoRutube($sVideoId) {
 
-        $sUrl = 'http://rutube.ru/api/video/' . $sVideoId;
+        $sUrl = 'http://rutube.ru/api/video/' . $sVideoId . '/?format=xml';
         $aResult = $this->ReadInfoFromXml($sUrl, array(
                 'thumbnail' => 'thumbnail_url',
                 'duration' => 'duration',
@@ -118,18 +129,19 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 'track_id' => 'track_id'
             ));
         if ($aResult) {
-            if ($aResult['html'] && preg_match('~\s+width\s*=\s*["\']?(\d+)["\']?\s+height\s*=\s*["\']?(\d+)["\']?', $aResult['html'], $aM)) {
+            $nW = self::DEFAULT_WIDTH;
+            $nH = self::DEFAULT_HEIGHT;
+            if ($aResult['html'] && preg_match('~\s+width\s*=\s*["\']?(\d+)["\']?\s+height\s*=\s*["\']?(\d+)["\']?~', $aResult['html'], $aM)) {
                 $aResult['width'] = $aM[1];
                 $aResult['height'] = $aM[2];
             }
             if ($aResult['width'] && $aResult['height']) {
-                $nW = self::DEFAULT_WIDTH;
                 $nK = $aResult['width'] / $nW;
                 $nH = round($aResult['height'] / $nK);
             }
             $sData = @file_get_contents($sUrl);
             if ($sData && preg_match('~<thumbnail_large>(.+)</thumbnail_large>~', $sData, $aM)) {
-                $sThumbnail = trim($aM[1]);
+                $aResult['thumbnail'] = trim($aM[1]);
             }
             $sHtml = '<iframe width="' . $nW . '" height="' . $nH . '" src="//rutube.ru/play/embed/' . $aResult['track_id'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
             $aResult['html'] = $sHtml;
