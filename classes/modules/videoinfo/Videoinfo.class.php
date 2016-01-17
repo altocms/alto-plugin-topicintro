@@ -72,6 +72,12 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         );
     }
 
+    /**
+     * @param $sUrl
+     * @param $aPaths
+     *
+     * @return array
+     */
     public function ReadInfoFromXml($sUrl, $aPaths) {
 
         $aResult = array_fill_keys(array_keys($aPaths), null);
@@ -86,16 +92,54 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         return $aResult;
     }
 
-    public function GetInfoYoutube($sVideoId) {
+    /**
+     * @param string $sUrl
+     * @param array  $aMap
+     *
+     * @return array
+     */
+    public function ReadInfoFromJson($sUrl, $aMap) {
 
-        $sThumbnail = 'http://img.youtube.com/vi/' . $sVideoId . '/hqdefault.jpg';
-        return array(
-            'thumbnail' => $sThumbnail,
-            'html' => '<iframe width="' . self::DEFAULT_WIDTH . '" height="' . self::DEFAULT_HEIGHT . '" src="//www.youtube.com/embed/' . $sVideoId . '" frameborder="0" allowfullscreen></iframe>',
-            'link' => 'http://youtu.be/' . $sVideoId,
-        );
+        if (($sData = file_get_contents($sUrl)) && $aData = @json_decode($sData, true)) {
+            $aResult = array();
+            foreach($aMap as $sKey => $sMap) {
+                if (isset($aData[$sMap])) {
+                    $aResult[$sKey] = $aData[$sMap];
+                } else {
+                    $aResult[$sKey] = null;
+                }
+            }
+        } else {
+            $aResult = array_fill_keys(array_keys($aMap), null);
+        }
+
+        return $aResult;
     }
 
+    /**
+     * @param string $sVideoId
+     *
+     * @return array
+     */
+    public function GetInfoYoutube($sVideoId) {
+
+        $sUrl = 'http://www.youtube.com/oembed?url=http%3A//youtube.com/watch%3Fv%3D' . $sVideoId . '&format=json';
+        $aResult = $this->ReadInfoFromJson($sUrl, array(
+            'thumbnail' => 'thumbnail_url',
+            'width' => 'thumbnail_width',
+            'height' => 'thumbnail_height',
+            'html' => 'html',
+        ));
+        $aResult['link'] = 'http://youtu.be/' . $sVideoId;
+
+        return $aResult;
+    }
+
+    /**
+     * @param string $sVideoId
+     *
+     * @return array
+     */
     public function GetInfoVimeo($sVideoId) {
 
         $sUrl = 'http://vimeo.com/api/v2/video/' . $sVideoId . '.xml';
@@ -111,6 +155,9 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 $nW = self::DEFAULT_WIDTH;
                 $nK = $aResult['width'] / $nW;
                 $nH = round($aResult['height'] / $nK);
+            } else {
+                $nW = self::DEFAULT_WIDTH;
+                $nH = self::DEFAULT_HEIGHT;
             }
             $sHtml = '<iframe src="//player.vimeo.com/video/' . $sVideoId . '?title=0&amp;byline=0&amp;portrait=0" width="' . $nW . '" height="' . $nH . '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
             $aResult['html'] = $sHtml;
@@ -118,6 +165,11 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         return $aResult;
     }
 
+    /**
+     * @param $sVideoId
+     *
+     * @return array
+     */
     public function GetInfoRutube($sVideoId) {
 
         $sUrl = 'http://rutube.ru/api/video/' . $sVideoId . '/?format=xml';
@@ -149,6 +201,11 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         return $aResult;
     }
 
+    /**
+     * @param $sVideoId
+     *
+     * @return array
+     */
     public function GetInfoRutubeTrack($sVideoId) {
 
         $sUrl = 'http://rutube.ru/api/oembed/?url=http://rutube.ru/tracks/' . $sVideoId . '.html/&format=xml';
@@ -165,6 +222,9 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
                 $nW = self::DEFAULT_WIDTH;
                 $nK = $aResult['width'] / $nW;
                 $nH = round($aResult['height'] / $nK);
+            } else {
+                $nW = self::DEFAULT_WIDTH;
+                $nH = self::DEFAULT_HEIGHT;
             }
             $sHtml = '<iframe width="' . $nW . '" height="' . $nH . '" src="//rutube.ru/play/embed/' . $sVideoId . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
             $aResult['html'] = $sHtml;
@@ -172,10 +232,11 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
         return $aResult;
     }
 
-    public function ParseUrl($sUrl) {
-
-    }
-
+    /**
+     * @param $sText
+     *
+     * @return array
+     */
     public function ParseText($sText) {
 
         $aResult = array();
