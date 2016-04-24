@@ -73,6 +73,27 @@ class PluginTopicintro_ModuleVideoinfo extends Module {
     }
 
     /**
+     * Get content by URL
+     * 
+     * @param string $sUrl
+     *
+     * @return bool|string
+     */
+    protected function _urlGetContents($sUrl) {
+
+        $aHeaders = get_headers($sUrl, 1);
+        if (!empty($aHeaders[0])) {
+            // 'HTTP/1.0 200 OK'
+            $aData = explode(' ', $aHeaders[0]);
+            if (!empty($aData[1]) && ($iHttpStatus = intval($aData[1])) && $iHttpStatus < 400) {
+                $sData = file_get_contents($sUrl);
+                return $sData ? $sData : false;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param $sUrl
      * @param $aPaths
      *

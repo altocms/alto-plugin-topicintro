@@ -13,7 +13,9 @@
  */
 $config['autopreview']['enable'] = true;
 
+// Правила игнорирования изображений в качестве превью
 $config['autopreview']['ignore'] = array(
+    'size' => '200x100', // ignore images with size smaller than this
     //'css_class' => 'some_css_class', // ignored classes
 );
 
@@ -32,8 +34,8 @@ $config['autopreview']['autosave'] = true;
  * Хук, по которому выводится автопревью
  * (если не требуется, то закомментируйте эту строку)
  */
-$config['autopreview']['hook_list'] = 'template_topic_content_begin';
-//$config['autopreview']['hook_show'] = 'template_topic_content_begin';
+$config['autopreview']['hook_list'] = 'template_topic_content_begin';   // превью при выводе списка топиков
+//$config['autopreview']['hook_show'] = 'template_topic_content_begin'; // превью при просмотре топика
 
 /*
  * Предзаданные размеры превью-изображений

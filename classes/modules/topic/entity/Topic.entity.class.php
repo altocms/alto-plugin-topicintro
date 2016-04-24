@@ -43,7 +43,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         $this->setAutopreview(true);
     }
 
-    protected function _checkCssClasses($aClasses, $aSrcClasses) {
+    protected function _ignoreByCssClasses($aClasses, $aSrcClasses) {
 
         if (!is_array($aClasses)) {
             $aClasses = explode(' ', $aClasses);
@@ -68,6 +68,20 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         return false;
     }
 
+    protected function _ignoreByImageSize($aSize, $sImagePath) {
+        
+        if (strlen($sImagePath) > 3) {
+            if ($sImagePath[0] === '/' && $sImagePath[1] !== '/') {
+                $sImagePath = ALTO_DIR . $sImagePath;
+            }
+            $aInfo = @getimagesize($sImagePath);
+            if ($aInfo && $aInfo[0] >= $aSize[0] && $aInfo[1] >= $aSize[1]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * @param string $sText
      * @param array  $aParams
@@ -91,17 +105,28 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             } else {
                 $aIgnoreCssClasses = array();
             }
+            $sMinWidth = $sMinHeight = null; 
+            if ($aParams['ignore']['size']) {
+                if (strpos($aParams['ignore']['size'], 'x') !== false) {
+                    list($sMinWidth, $sMinHeight) = explode('x', $aParams['ignore']['size']);
+                } else {
+                    $sMinWidth = $sMinHeight = $aParams['ignore']['size'];
+                }
+            }
             foreach ($aM[1] as $nIdx => $aData) {
                 // $aM[1][x][0] - link to image or data:URI
                 $sImg = trim($aData[0]);
-                if (strpos($sImg, 'data:') === false) {
+                if ($sImg && strpos($sImg, 'data:') === false) {
                     // $aM[0][x][0] - tag <img ...>
                     if ($aIgnoreCssClasses && preg_match('/\sclass\s*=\s*[\'\"]([^\'\"]+)[\'\"]/si', $aM[0][$nIdx][0], $aMtch)) {
-                        $bIgnore = $this->_checkCssClasses($aIgnoreCssClasses, $aMtch[1]);
+                        $bIgnore = $this->_ignoreByCssClasses($aIgnoreCssClasses, $aMtch[1]);
                     } else {
                         $bIgnore = false;
                     }
-
+                    if (!$bIgnore && $sMinWidth && $sMinHeight) {
+                        $bIgnore = $this->_ignoreByImageSize(array($sMinWidth, $sMinHeight), $sImg);
+                    }
+                    
                     if (!$bIgnore) {
                         // $aM[0][x][1] - found position
                         $aResult[$aM[0][$nIdx][1]] = $sImg;
@@ -159,6 +184,10 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     public function getPreviewImage() {
 
         $sPreviewImage = $this->getExtraValue('preview_image');
+        $iPhotosetCover = $this->getPhotosetMainPhotoId();
+        if ($iPhotosetCover) {
+            return null;
+        }
         if (is_null($sPreviewImage)) {
             if ($nId = $this->getPhotosetMainPhotoId()) {
                 $oTopicPhoto = $this->Topic_GetTopicPhotoById($nId);
@@ -233,7 +262,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     }
 
     /**
-     * Sets preview image sizes and attributes and returns its
+     * Set preview image sizes and attributes and return settings as array
      *
      * @param string      $sSize
      * @param string|null $sFile
