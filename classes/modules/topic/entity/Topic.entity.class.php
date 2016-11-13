@@ -18,31 +18,50 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         return $this->getPreviewImageUrl($sSize);
     }
 
-    public function setPreviewImage($data, $bAutopreview = false) {
+    /**
+     * @param string $sImageUrl
+     * @param bool   $bAutopreview
+     */
+    public function setPreviewImage($sImageUrl, $bAutopreview = false) {
 
-        if (is_null($data) && (func_num_args() == 1)) {
+        if (is_null($sImageUrl) && (func_num_args() == 1)) {
             $bAutopreview = null;
         }
-        $this->setExtraValue('preview_image', $data);
+        $this->setExtraValue('preview_image', $sImageUrl);
         $this->setAutopreview($bAutopreview);
     }
 
-    public function setAutopreview($data) {
+    /**
+     * @param $bData
+     */
+    public function setAutopreview($bData) {
 
-        $this->setExtraValue('preview_image_is_auto', $data ? true : false);
+        $this->setExtraValue('preview_image_is_auto', $bData ? true : false);
     }
 
+    /**
+     * @return bool
+     */
     public function getAutopreview() {
 
         return $this->getExtraValue('preview_image_is_auto');
     }
 
-    public function setAutoPreviewImage($data) {
+    /**
+     * @param string $sImageUrl
+     */
+    public function setAutoPreviewImage($sImageUrl) {
 
-        $this->setPreviewImage($data);
+        $this->setPreviewImage($sImageUrl);
         $this->setAutopreview(true);
     }
 
+    /**
+     * @param $aClasses
+     * @param $aSrcClasses
+     *
+     * @return bool
+     */
     protected function _ignoreByCssClasses($aClasses, $aSrcClasses) {
 
         if (!is_array($aClasses)) {
@@ -68,6 +87,12 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         return false;
     }
 
+    /**
+     * @param $aSize
+     * @param $sImagePath
+     *
+     * @return bool
+     */
     protected function _ignoreByImageSize($aSize, $sImagePath) {
         
         if (strlen($sImagePath) > 3) {
@@ -86,7 +111,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
      * @param string $sText
      * @param array  $aParams
      *
-     * @return mixed
+     * @return array
      */
     protected function _seekProtoImages($sText = null, $aParams = array()) {
 
@@ -183,29 +208,29 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
      */
     public function getPreviewImage() {
 
-        $sPreviewImage = $this->getExtraValue('preview_image');
-        $iPhotosetCover = $this->getPhotosetMainPhotoId();
-        if ($iPhotosetCover) {
-            return null;
-        }
-        if (is_null($sPreviewImage)) {
-            if ($nId = $this->getPhotosetMainPhotoId()) {
-                $oTopicPhoto = $this->Topic_GetTopicPhotoById($nId);
-                if ($oTopicPhoto) {
-                    $sPreviewImage = $oTopicPhoto->getUrl();
+        $sPreviewImageUrl = $this->getExtraValue('preview_image');
+        if (is_null($sPreviewImageUrl)) {
+            $oMainPhoto = $this->getPhotosetMainPhoto();
+            if ($oMainPhoto) {
+                $sPreviewImageUrl = $oMainPhoto->getUrl();
+            } elseif ($nId = $this->getPhotosetMainPhotoId()) {
+                // LS-compatibility
+                $oMainPhoto = $this->Topic_GetTopicPhotoById($nId);
+                if ($oMainPhoto) {
+                    $sPreviewImageUrl = $oMainPhoto->getUrl();
                 }
             }
-            if (!$sPreviewImage && Config::Get('plugin.topicintro.autopreview.enable')) {
-                $sPreviewImage = $this->getFirstImage();
-                $this->setAutoPreviewImage($sPreviewImage ? $sPreviewImage : false);
+            if (!$sPreviewImageUrl && Config::Get('plugin.topicintro.autopreview.enable')) {
+                $sPreviewImageUrl = $this->getFirstImage();
+                $this->setAutoPreviewImage($sPreviewImageUrl ? $sPreviewImageUrl : false);
             } else {
-                $this->setPreviewImage($sPreviewImage ? $sPreviewImage : false);
+                $this->setPreviewImage($sPreviewImageUrl ? $sPreviewImageUrl : false);
             }
             if (Config::Get('plugin.topicintro.autopreview.autosave') && $this->getId()) {
                 $this->Topic_UpdateTopic($this);
             }
         }
-        return $sPreviewImage;
+        return $sPreviewImageUrl;
     }
 
     /**
