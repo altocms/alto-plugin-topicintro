@@ -59,7 +59,7 @@ class PluginTopicintro_HookTopicintro extends Hook {
      */
     public function InjectIntroTextInList($aParams) {
 
-        if (isset($aParams['bTopicList']) && $aParams['bTopicList'] && (isset($aParams['topic'])) || isset($aParams['oTopic'])) {
+        if (!empty($aParams['bTopicList']) && (isset($aParams['topic']) || isset($aParams['oTopic']))) {
             $oTopic = (isset($aParams['topic']) ? $aParams['topic'] : $aParams['oTopic']);
             $this->Viewer_Assign('oTopic', $oTopic);
             return $this->Viewer_Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/fields/field.intro_text-list.tpl');
@@ -74,7 +74,7 @@ class PluginTopicintro_HookTopicintro extends Hook {
      */
     public function InjectIntroTextInShow($aParams) {
 
-        if (isset($aParams['bTopicList']) && !$aParams['bTopicList'] && (isset($aParams['topic'])) || isset($aParams['oTopic'])) {
+        if (isset($aParams['bTopicList']) && !$aParams['bTopicList'] && (isset($aParams['topic']) || isset($aParams['oTopic']))) {
             $oTopic = (isset($aParams['topic']) ? $aParams['topic'] : $aParams['oTopic']);
             $this->Viewer_Assign('oTopic', $oTopic);
             return $this->Viewer_Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/fields/field.intro_text-show.tpl');
@@ -89,9 +89,10 @@ class PluginTopicintro_HookTopicintro extends Hook {
      */
     public function InjectPreviewInList($aParams) {
 
-        if (isset($aParams['bTopicList']) && $aParams['bTopicList'] && (isset($aParams['topic'])) || isset($aParams['oTopic'])) {
+        if (isset($aParams['bTopicList']) && $aParams['bTopicList'] && (isset($aParams['topic']) || isset($aParams['oTopic']))) {
             $oTopic = (isset($aParams['topic']) ? $aParams['topic'] : $aParams['oTopic']);
             $this->Viewer_Assign('oTopic', $oTopic);
+            $s = $this->Viewer_Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/fields/field.preview_img-list.tpl');
             return $this->Viewer_Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/fields/field.preview_img-list.tpl');
         }
         return null;
@@ -104,7 +105,7 @@ class PluginTopicintro_HookTopicintro extends Hook {
      */
     public function InjectPreviewInShow($aParams) {
 
-        if (isset($aParams['bTopicList']) && !$aParams['bTopicList'] && (isset($aParams['topic'])) || isset($aParams['oTopic'])) {
+        if (isset($aParams['bTopicList']) && !$aParams['bTopicList'] && (isset($aParams['topic']) || isset($aParams['oTopic']))) {
             $oTopic = (isset($aParams['topic']) ? $aParams['topic'] : $aParams['oTopic']);
             $this->Viewer_Assign('oTopic', $oTopic);
             return $this->Viewer_Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/fields/field.preview_img-show.tpl');

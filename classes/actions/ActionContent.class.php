@@ -10,6 +10,11 @@
 
 class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionContent {
 
+    /**
+     * @param $oTopic
+     *
+     * @return bool
+     */
     protected function checkTopicFields($oTopic) {
 
         $bResult = true;
@@ -20,7 +25,7 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
 
             // defines length of introtext without tags
             $nLen = mb_strlen(strip_tags($sIntroText), 'UTF-8');
-            $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
+            $nMax = (int)Config::Get('plugin.topicintro.introtext.max_size');
 
             if ($nMax && ($nLen > $nMax)) {
                 $this->Message_AddError(
@@ -42,12 +47,18 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
         return $bResult && parent::checkTopicFields($oTopic);
     }
 
+    /**
+     * @return mixed
+     */
     protected function EventEdit() {
 
         $this->Hook_AddExecFunction('topic_edit_show', array($this, '_topicEditShow'));
         return parent::EventEdit();
     }
 
+    /**
+     * @param $aParams
+     */
     public function _topicEditShow($aParams) {
 
         if (!isset($_REQUEST['topic_intro_text']) && isset($aParams['oTopic']) && ($oTopic = $aParams['oTopic'])) {

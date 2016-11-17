@@ -24,7 +24,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
      */
     public function setPreviewImage($sImageUrl, $bAutopreview = false) {
 
-        if (is_null($sImageUrl) && (func_num_args() == 1)) {
+        if (null === $sImageUrl && (func_num_args() === 1)) {
             $bAutopreview = null;
         }
         $this->setExtraValue('preview_image', $sImageUrl);
@@ -57,8 +57,8 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     }
 
     /**
-     * @param $aClasses
-     * @param $aSrcClasses
+     * @param array $aClasses
+     * @param array $aSrcClasses
      *
      * @return bool
      */
@@ -71,14 +71,14 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             $aSrcClasses = explode(' ', $aSrcClasses);
         }
 
-        if (sizeof($aClasses) == sizeof($aSrcClasses)) {
-            if (sizeof($aClasses) == 1) {
-                return reset($aClasses) == reset($aSrcClasses);
+        if (count($aClasses) === count($aSrcClasses)) {
+            if (count($aClasses) === 1) {
+                return reset($aClasses) === reset($aSrcClasses);
             }
             sort($aClasses);
             sort($aSrcClasses);
             foreach ($aClasses as $iKey => $sCssClass) {
-                if ($aSrcClasses[$iKey] != $sCssClass) {
+                if ($aSrcClasses[$iKey] !== $sCssClass) {
                     return false;
                 }
             }
@@ -116,7 +116,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     protected function _seekProtoImages($sText = null, $aParams = array()) {
 
         $aResult = array();
-        if (is_null($sText)) {
+        if (null === $sText) {
             $sText = $this->getText();
         }
 
@@ -184,7 +184,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
 
         $sPropKey = '_first_image_url_' . ($bInIntroText ? 'i' : 't');
         $sImg = $this->getProp($sPropKey);
-        if (is_null($sImg)) {
+        if ($sImg === null) {
             $sImg = '';
             if ($bInIntroText) {
                 $sText = $this->getIntroText('');
@@ -193,7 +193,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             }
             $aParams = Config::Get('plugin.topicintro.autopreview');
             if ($aImg = $this->_seekProtoImages($sText, $aParams)) {
-                if (sizeof($aImg) > 1) {
+                if (count($aImg) > 1) {
                     ksort($aImg);
                 }
                 $sImg = reset($aImg);
@@ -209,7 +209,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     public function getPreviewImage() {
 
         $sPreviewImageUrl = $this->getExtraValue('preview_image');
-        if (is_null($sPreviewImageUrl)) {
+        if ($sPreviewImageUrl === null) {
             $oMainPhoto = $this->getPhotosetMainPhoto();
             if ($oMainPhoto) {
                 $sPreviewImageUrl = $oMainPhoto->getUrl();
@@ -250,7 +250,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         } elseif ($xPresetSize = Config::Get('plugin.topicintro.preview.size.' . $xSize)){
             $xSize = $xPresetSize;
         }
-        if (is_numeric($xSize) && intval($xSize) == $xSize) {
+        if (is_numeric($xSize) && $xSize == (int)$xSize) {
             if (Config::Get('plugin.topicintro.single_width')) {
                 $xSize = 'x' . $xSize;
             } else {
@@ -271,7 +271,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
             if (F::File_IsLocalUrl($sUrl)) {
                 $sSize = $this->_normalizePreviewSize($xSize);
                 $sModSuffix = F::File_ImgModSuffix($sSize, strtolower(pathinfo($sUrl, PATHINFO_EXTENSION)));
-                $sUrl = $sUrl . $sModSuffix;
+                $sUrl .= $sModSuffix;
                 if (Config::Get('module.image.autoresize')) {
                     $sFile = $this->Uploader_Url2Dir($sUrl);
                     if (!F::File_Exists($sFile)) {
@@ -321,14 +321,14 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
                     'style' => null,
                 );
                 if (!empty($aModAttr['mod'])) {
-                    if ($aModAttr['mod'] == 'fit') {
+                    if ($aModAttr['mod'] === 'fit') {
                         $aSize['max-width'] = $aModAttr['width'];
                         $aSize['max-height'] = $aModAttr['height'];
                         $aSize['style'] = ''
                             . ($aSize['width'] ? 'max-width:' . $aSize['width'] . 'px;' : '')
                             . ($aSize['height'] ? 'max-height:' . $aSize['height'] . 'px;' : '');
                     }
-                    if ($aModAttr['mod'] == 'pad') {
+                    if ($aModAttr['mod'] === 'pad') {
                         $aSize['min-width'] = $aModAttr['width'];
                         $aSize['min-height'] = $aModAttr['height'];
                         $aSize['style'] = ''
@@ -423,7 +423,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
         }
         if (!$sIntroText && Config::Get('plugin.topicintro.introtext.autocreate')) {
             $sIntroText = $this->Topic_ParseIntroText($this->getText());
-            $nMax = intval(Config::Get('plugin.topicintro.introtext.max_size'));
+            $nMax = (int)Config::Get('plugin.topicintro.introtext.max_size');
             $nLen = mb_strlen($sIntroText, 'UTF-8');
             if ($nMax && $nLen > $nMax) {
                 $sIntroText = $this->Text_TruncateText($sIntroText, $nMax - mb_strlen($sPostfix, 'UTF-8'));
@@ -440,7 +440,7 @@ class PluginTopicintro_ModuleTopic_EntityTopic extends PluginTopicintro_Inherits
     public function getTextShort() {
 
         $sText = parent::getTextShort();
-        if (Config::Get('plugin.topicintro.introtext.enable') && (!$sText || $sText == $this->getText()) && Config::Get('plugin.topicintro.introtext.text_short')) {
+        if (Config::Get('plugin.topicintro.introtext.enable') && (!$sText || $sText === $this->getText()) && Config::Get('plugin.topicintro.introtext.text_short')) {
             $sIntroText = $this->getIntroText('', true);
             if ($sIntroText) {
                 $sText = $sIntroText;
