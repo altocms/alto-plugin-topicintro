@@ -42,9 +42,8 @@ class PluginTopicintro extends Plugin {
      */
     public function Init() {
 
-        //$this->Viewer_AppendScript(Plugin::GetTemplateDir(__CLASS__) . 'assets/js/script.js');
-        $this->Viewer_AppendScript(Plugin::GetTemplateUrl(__CLASS__) . 'assets/js/script.js');
-        $this->Viewer_AppendStyle(Plugin::GetTemplateDir(__CLASS__) . 'assets/css/style.css');
+        $this->Viewer_AppendScript(Plugin::GetTemplateDir(__CLASS__) . 'assets/js/plugin.topicintro.js');
+        $this->Viewer_AppendStyle(Plugin::GetTemplateDir(__CLASS__) . 'assets/css/plugin.topicintro.css');
         return true;
     }
 }
