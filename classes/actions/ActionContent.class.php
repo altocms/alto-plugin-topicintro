@@ -83,6 +83,22 @@ class PluginTopicintro_ActionContent extends PluginTopicintro_Inherits_ActionCon
         return parent::_addTopic($oTopic);
     }
 
+    /**
+     * Updates topic
+     *
+     * @param $oTopic
+     *
+     * @return bool
+     */
+    protected function _updateTopic($oTopic) {
+
+        if (Config::Get('plugin.topicintro.introtext.text_short')) {
+            $sIntroText = $oTopic->getExtraValue('text_intro');
+            $oTopic->setTextShort($sIntroText);
+        }
+        return parent::_updateTopic($oTopic);
+    }
+
 }
 
 // EOF
